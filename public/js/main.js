@@ -19,6 +19,14 @@ function initNavbar() {
   const hamburger = document.querySelector('.hamburger');
   const navLinks = document.querySelector('.nav-links');
 
+  // Create overlay for mobile menu
+  let overlay = document.querySelector('.nav-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.classList.add('nav-overlay');
+    document.body.appendChild(overlay);
+  }
+
   // Scroll effect
   window.addEventListener('scroll', () => {
     if (window.scrollY > 50) {
@@ -28,19 +36,33 @@ function initNavbar() {
     }
   });
 
+  function closeMenu() {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
   // Mobile toggle
   if (hamburger) {
     hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('active');
-      navLinks.classList.toggle('open');
+      const isOpen = navLinks.classList.contains('open');
+      if (isOpen) {
+        closeMenu();
+      } else {
+        hamburger.classList.add('active');
+        navLinks.classList.add('open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
     });
+
+    // Close on overlay click
+    overlay.addEventListener('click', closeMenu);
 
     // Close on link click
     navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('open');
-      });
+      link.addEventListener('click', closeMenu);
     });
   }
 
@@ -196,6 +218,23 @@ function initLightbox() {
     if (e.key === 'ArrowLeft' && prevBtn) prevBtn.click();
     if (e.key === 'ArrowRight' && nextBtn) nextBtn.click();
   });
+
+  // Swipe support for mobile
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  lightbox.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  lightbox.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && nextBtn) nextBtn.click();
+      if (diff < 0 && prevBtn) prevBtn.click();
+    }
+  }, { passive: true });
 }
 
 /* ---------- Booking Form (EmailJS) ---------- */
